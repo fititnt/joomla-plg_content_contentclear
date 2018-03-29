@@ -1,0 +1,1 @@
+# joomla_plg_content_clear
