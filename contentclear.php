@@ -1,40 +1,74 @@
 <?php
-/*
+	/*
  * @package         plg_contentclear
  * @author          Emerson Rocha Luiz (emerson@alligo.com.br)
  * @copyright       Copyright (C) 2005 - 2018 Alligo LTDA.
- * @license         GPL3
+ * @license         Public Domain
  */
 
 defined('_JEXEC') or die;
 
-/**
- * Example Content Plugin
- *
- * @since  1.6
- */
 class PlgContentContentclear extends JPlugin
 {
+	/**
+	 * Not implemented
+	 */
+	protected $dom_replace = [
+	];
 
 	/**
-	 * see https://www.sitepoint.com/community/t/remove-inline-style-with-preg-replace/21743/3
-	 * see https://stackoverflow.com/questions/5517255/remove-style-attribute-from-html-tags
-	 * see https://stackoverflow.com/questions/7740249/how-to-strip-style-attributes-from-html-tags
+	 * @see     http://php.net/manual/function.preg-replace.php
+	 */
+	protected $regex_replace = [
+	];
+
+	/**
+	 * @see     http://php.net/manual/function.str-replace.php
+	 */
+	protected $simple_replace = [
+		'span style="font-size: 12.16px;"' => 'span'
+	];
+
+
+	/**
+	 * Cleans one HTML string based on simple string replace and regex replace.
+	 * It will show a message on joomla administration if changed something on
+	 * the HTML created.
+	 *
+	 * @todo    A more serious implementation would use DOM manipulation, since
+	 *          Simple string replace and even regex are not really reliable.
+	 *          Implemement DOM manipulation if necessary on the future
+	 *          (fititnt, 2018-04-01 21:01 BRT)
+	 *
+	 * @param   string   $htmlstring  HTML string to be manipulated
+	 *
+	 * @return  string
 	 **/
 	private function _clean($htmlstring) {
-		$domd = new DOMDocument();
-		libxml_use_internal_errors(true);
-		$domd->loadHTML($html);
-		libxml_use_internal_errors(false);
+		if (!empty($htmlstring) && is_string($htmlstring)) {
+			$original_string = $htmlstring;
+			$diff = 0;
 
-		$domx = new DOMXPath($domd);
-		$items = $domx->query("//span[@style]");
-		
-		foreach($items as $item) {
-		  $item->removeAttribute("style");
+			if (!empty($this->simple_replace)){
+				foreach($this->simple_replace AS $pattern => $replacement) {
+					$htmlstring = str_replace($pattern, $replacement, $htmlstring);
+				}
+			}
+			if (!empty($this->preg_replace)){
+				foreach($this->preg_replace AS $pattern => $replacement) {
+					$htmlstring = str_replace($pattern, $replacement, $htmlstring);
+				}
+			}
+
+			$diff = strlen($original_string) - strlen($htmlstring);
+			if ($diff) {
+				JFactory::getApplication()->enqueueMessage('Content Clear: ' . $diff . ' caracteres');
+			}
+
+			// NOTE:$this->dom_replace is not implemented
 		}
-		
-		return $domd->saveHTML();
+
+		return $htmlstring;
 	}
 
 
@@ -53,24 +87,14 @@ class PlgContentContentclear extends JPlugin
 	 */
 	public function onContentBeforeSave($context, $article, $isNew)
 	{
-
-		//die();
 		// Check we are handling the frontend edit form.
 		if ($context !== 'com_content.article')
 		{
 			return true;
 		}
 
-
-		// print_r($article->introtext. 'TEEESTE 1111');
-		// print_r($this->_clean($article->introtext) . 'TEEESTE 2222');
-		// die ();
-		$article->introtext = 'oioioi' . $article->introtext . $this->_clean($article->introtext);
-		echo $article->introtext ;
-		die;
-		// $article->introtext = $this->_clean($article->introtext);
-
-		//...,
+		$article->introtext = $this->_clean($article->introtext);
+		$article->fulltext = $this->_clean($article->fulltext);
 
 		return true;
 	}

@@ -1,1 +1,3 @@
-# joomla-plg_contentclear
+# Joomla Plugin Content Clear 0.1-beta
+
+
