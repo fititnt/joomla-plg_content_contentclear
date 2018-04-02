@@ -1,8 +1,7 @@
 <?php
 	/*
- * @package         plg_contentclear
+ * @package         plg_content_contentclear
  * @author          Emerson Rocha Luiz (emerson@alligo.com.br)
- * @copyright       Copyright (C) 2005 - 2018 Alligo LTDA.
  * @license         Public Domain
  */
 
@@ -62,7 +61,7 @@ class PlgContentContentclear extends JPlugin
 
 			$diff = strlen($original_string) - strlen($htmlstring);
 			if ($diff) {
-				JFactory::getApplication()->enqueueMessage('Content Clear: ' . $diff . ' caracteres');
+				JFactory::getApplication()->enqueueMessage(JText::sprintf('PLG_CONTENTCLEAR_DIFFCOUNT', $diff));
 			}
 
 			// NOTE:$this->dom_replace is not implemented
